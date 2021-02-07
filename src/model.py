@@ -37,22 +37,22 @@ def createModel():
     
     # Layers
     data_augmentation_layer = tf.keras.Sequential([
-            exper_preprocess.RandomFlip("horizontal", input_shape=(img_height, img_width, 3)),
-            exper_preprocess.RandomRotation(0.1),
-            exper_preprocess.RandomZoom(0.1),
+            exper_preprocess.RandomFlip("horizontal_and_vertical", input_shape=(img_height, img_width, 3)),
+            exper_preprocess.RandomRotation(0.2),
+            exper_preprocess.RandomZoom(0.1)
     ])
     normalization_layer = exper_preprocess.Rescaling(1./255, input_shape=(img_height, img_width, 3))
 
     model = tf.keras.models.Sequential([
         data_augmentation_layer,
         normalization_layer,
-        layers.Conv2D(16, 3, padding='same', activation='relu'),
-        layers.MaxPooling2D(),
         layers.Conv2D(32, 3, padding='same', activation='relu'),
         layers.MaxPooling2D(),
         layers.Conv2D(64, 3, padding='same', activation='relu'),
         layers.MaxPooling2D(),
-        layers.Dropout(0.3),
+        layers.Conv2D(128, 3, padding='same', activation='relu'),
+        layers.MaxPooling2D(),
+        layers.Dropout(0.2),
         layers.Flatten(),
         layers.Dense(128, activation='relu'),
         layers.Dense(num_classes)
@@ -65,6 +65,9 @@ def createModel():
     model.summary()
 
     model.fit(train_ds, validation_data=val_ds, epochs=num_epochs)
+    test_loss, test_acc = model.evaluate(test_ds)
+    print(test_loss)
+    print(test_acc)
 
     model.save(path_to_model)
     pass
@@ -81,6 +84,9 @@ def trainModel():
     model = tf.keras.models.load_model(path_to_model)
 
     history = model.fit(train_ds, validation_data=val_ds, epochs=epochs)
+    test_loss, test_acc = model.evaluate(test_ds)
+    print(test_loss)
+    print(test_acc)
     
     model.save(path_to_model)
 
@@ -128,7 +134,11 @@ def predictModel():
 
 
 if __name__ == '__main__':
-    # createModel()
+    createModel()
+
     # trainModel()
+    # trainModel()
+    # trainModel()
+    
     predictModel()
     pass
