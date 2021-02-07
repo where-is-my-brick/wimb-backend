@@ -1,5 +1,5 @@
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+import platform
 import configparser
 import matplotlib.pyplot as plt
 import tensorflow as tf
@@ -7,6 +7,17 @@ from tensorflow import keras
 import tensorflow.keras.layers as layers
 import tensorflow.keras.layers.experimental.preprocessing as exper_preprocess
 import numpy as np
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
+platform = platform.uname()
+if (platform.system == 'Darwin' and platform.machine == 'arm64'):
+    print("Optimizing for M1")
+    # Import mlcompute module to use the optional set_mlc_device API for device selection with ML Compute.
+    from tensorflow.python.compiler.mlcompute import mlcompute
+    # Select CPU device.
+    mlcompute.set_mlc_device(device_name='gpu') # Available options are 'cpu', 'gpu', and ‘any'.
+
 
 from dataset import prepareDatasets
 
@@ -98,14 +109,20 @@ def trainModel():
 def predictModel():
     train_ds, val_ds, test_ds = prepareDatasets()
     model = tf.keras.models.load_model(path_to_model)
+    
     image_batch, label_batch = test_ds.as_numpy_iterator().next()
-    predictions = model.predict_on_batch(image_batch).flatten()
+    
+    predictions = model.predict_on_batch(image_batch)
 
-    print(label_batch[0])
+    categorys = [dir for dir in os.listdir('datasets/flower_photos')]
+    categorys = categorys[:-1]
+    categorys.sort()
 
-    plt.imshow(image_batch[0].astype("uint8"))
-    plt.title(predictions[0])
-    plt.show()
+    for image, prediction in zip(image_batch, predictions):
+        score = tf.nn.softmax(prediction)
+        plt.imshow(image.astype("uint8"))
+        plt.title(f"Category: {categorys[np.argmax(score)]} with {100 * np.max(score)}% confidence")
+        plt.show()
 
     pass
 

@@ -22,9 +22,15 @@ def downloadDataset():
     directory = 'datasets/'
     url = 'https://onedrive.live.com/download?cid=DE07050F0B3164E1&resid=DE07050F0B3164E1%2162938&authkey=AIT6kBW-GJwYm3Y'
     # url = 'https://onedrive.live.com/download?cid=DE07050F0B3164E1&resid=DE07050F0B3164E1%2159261&authkey=AMswoY3myXkPX2w'
-    filename = wget.download(url, out=directory)
 
-    with zipfile.ZipFile(directory + filename, 'r') as zip:
+    if not os.path.exists(directory):
+        print(f"Directory {directory} was created, because it didn't exist")
+        os.mkdir(directory)
+    
+    wget.download(url, out=directory)
+
+    # TODO Make 'flower_photos.zip' as a Variable
+    with zipfile.ZipFile(directory + 'flower_photos.zip', 'r') as zip:
         zip.extractall(directory)
         pass
 
@@ -82,6 +88,6 @@ def prepareDatasets():
 
 
 if __name__ == '__main__':
-    # downloadDataset()
-    prepareDatasets()
+    downloadDataset()
+    # prepareDatasets()
     pass
