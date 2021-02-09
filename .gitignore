@@ -1,0 +1,15 @@
+# vscode
+.vscode/
+
+# virtual enviroments
+venv/
+env/
+
+# datasets
+datasets/
+
+# models
+models/
+
+# Python files
+__pycache__/
